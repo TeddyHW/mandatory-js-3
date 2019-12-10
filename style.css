@@ -26,6 +26,11 @@ header {
   grid-row: 2;
 }
 
+.sub {
+  grid-column: 3;
+  grid-row: 1;
+}
+
 .bTest {
   width: 400px;
   height: 300px;
