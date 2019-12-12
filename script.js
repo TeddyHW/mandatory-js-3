@@ -1,7 +1,6 @@
-function reqListener() {
+function mainList() {
   let obj = JSON.parse(oReq.responseText);
   breedList = Object.keys(obj.message);
-  console.log(breedList);
   for (var i = 0; i < breedList.length; i++) {
     let ul = document.querySelector(".list");
     let list = document.createElement("li");
@@ -21,10 +20,95 @@ function reqListener() {
   }
 }
 
-function picListener() {
+function subLister() {
+  if (isHash === false) {
+    setHash();
+  }
+  //isHash = false;
+  isSub = false;
+  let obj = JSON.parse(subBreed.responseText);
+  subBreedList = Object(obj.message);
+  if (subCheck === true) {
+    for (var i = 0; i < subLength; i++) {
+      let remUL = document.querySelector(".subUl");
+      let remLi = document.querySelector(".subUl li");
+      let remA = document.querySelector(".subUl li a");
+
+      remLi.removeChild(remA);
+      remUL.removeChild(remLi);
+    }
+  }
+
+  subCheck = false;
+  for (var i = 0; i < subBreedList.length; i++) {
+    let ul = document.querySelector(".subUl");
+    let list = document.createElement("li");
+    let link = document.createElement("a");
+    link.textContent = subBreedList[i];
+    let id = "subNum" + [i];
+    link.setAttribute("class", "mySubLink");
+    link.setAttribute("id", id);
+    link.setAttribute("href", "#");
+    ul.appendChild(list);
+    list.appendChild(link);
+
+    subCheck = true;
+    subLength = subBreedList.length;
+  }
+  let a = document.querySelectorAll(".mySubLink");
+  for (var i = 0; i < a.length; i++) {
+    a[i].addEventListener("click", subLinkClick);
+  }
+  isBreed = true;
+  notHash = false;
+}
+
+function linkClick(e) {
+  let where = e.target;
+  let linkId = where.id;
+  currentBreed = where.textContent;
+
+  let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
+  let subList = "https://dog.ceo/api/breed/" + currentBreed + "/list";
+
+  for (var i = 0; i < bArr.length; i++) {
+    let loopNum = "num" + [i];
+    if (linkId === loopNum) {
+      bArr[i] = true;
+
+      breedPic.open("GET", breed);
+      breedPic.addEventListener("load", makeBreedPics);
+      breedPic.send();
+
+      subBreed.addEventListener("load", subLister);
+      subBreed.open("GET", subList);
+      subBreed.send();
+
+      let title = document.querySelector("h1");
+      title.textContent = currentBreed;
+      break;
+    }
+  }
+}
+
+function subLinkClick(e) {
+  let where = e.target;
+  let linkId = where.id;
+  currentSubBreed = where.textContent;
+
+  let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
+  currentSubBreed + "/images/random/3";
+  subBreedPic.open("GET", breed);
+  subBreedPic.addEventListener("load", makeSubPics);
+  subBreedPic.send();
+
+  let title = document.querySelector("h1");
+  title.textContent = currentSubBreed;
+}
+
+function randomPic() {
   let randPic = JSON.parse(pic.responseText);
   let arrPic = randPic.message;
-  console.log(arrPic);
 
   for (var i = 0; i < arrPic.length; i++) {
     if (bCheck1 === false) {
@@ -57,35 +141,7 @@ function picListener() {
   }
 }
 
-function linkClick(e) {
-  let where = e.target;
-  let linkId = where.id;
-  currentBreed = where.textContent;
-
-  let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
-  let subList = "https://dog.ceo/api/breed/" + currentBreed + "/list";
-
-  for (var i = 0; i < bArr.length; i++) {
-    let loopNum = "num" + [i];
-    if (linkId === loopNum) {
-      bArr[i] = true;
-
-      breedPic.open("GET", breed);
-      breedPic.addEventListener("load", breedListener);
-      breedPic.send();
-
-      subBreed.addEventListener("load", subListener);
-      subBreed.open("GET", subList);
-      subBreed.send();
-
-      let title = document.querySelector("h1");
-      title.textContent = currentBreed;
-      break;
-    }
-  }
-}
-
-function breedListener() {
+function makeBreedPics() {
   if (isHash === false) {
     setHash();
   }
@@ -139,66 +195,7 @@ function breedListener() {
   notHash = false;
 }
 
-function subListener() {
-  if (isHash === false) {
-    setHash();
-  }
-  //isHash = false;
-  isSub = false;
-  let obj = JSON.parse(subBreed.responseText);
-  subBreedList = Object(obj.message);
-  console.log(subBreedList);
-  if (subCheck === true) {
-    for (var i = 0; i < subLength; i++) {
-      let remUL = document.querySelector(".subUl");
-      let remLi = document.querySelector(".subUl li");
-      let remA = document.querySelector(".subUl li a");
-
-      remLi.removeChild(remA);
-      remUL.removeChild(remLi);
-    }
-  }
-
-  subCheck = false;
-  for (var i = 0; i < subBreedList.length; i++) {
-    let ul = document.querySelector(".subUl");
-    let list = document.createElement("li");
-    let link = document.createElement("a");
-    link.textContent = subBreedList[i];
-    let id = "subNum" + [i];
-    link.setAttribute("class", "mySubLink");
-    link.setAttribute("id", id);
-    link.setAttribute("href", "#");
-    ul.appendChild(list);
-    list.appendChild(link);
-
-    subCheck = true;
-    subLength = subBreedList.length;
-  }
-  let a = document.querySelectorAll(".mySubLink");
-  for (var i = 0; i < a.length; i++) {
-    a[i].addEventListener("click", subLinkClick);
-  }
-  isBreed = true;
-  notHash = false;
-}
-
-function subLinkClick(e) {
-  let where = e.target;
-  let linkId = where.id;
-  currentSubBreed = where.textContent;
-
-  let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
-  currentSubBreed + "/images/random/3";
-  subBreedPic.open("GET", breed);
-  subBreedPic.addEventListener("load", subBreedListener);
-  subBreedPic.send();
-
-  let title = document.querySelector("h1");
-  title.textContent = currentSubBreed;
-}
-
-function subBreedListener() {
+function makeSubPics() {
   isBreed = false;
   isSub = true;
   if (isHash === false) {
@@ -255,19 +252,18 @@ function subBreedListener() {
   notHash = false;
 }
 
-
 function onClick(e) {
   if (isBreed === true) {
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
     breedPic.open("GET", breed);
-    breedPic.addEventListener("load", breedListener);
+    breedPic.addEventListener("load", makeBreedPics);
     breedPic.send();
   }
   else if (isSub === true) {
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
     currentSubBreed + "/images/random/3";
     subBreedPic.open("GET", breed);
-    subBreedPic.addEventListener("load", subBreedListener);
+    subBreedPic.addEventListener("load", makeSubPics);
     subBreedPic.send();
   }
   else {
@@ -302,7 +298,7 @@ function searchHash() {
   let dogCheck = breedList.includes(firstDog);
 
   let subList = "https://dog.ceo/api/breed/" + firstDog + "/list";
-  subBreed.addEventListener("load", subListener);
+  subBreed.addEventListener("load", subLister);
   subBreed.open("GET", subList);
   subBreed.send();
 
@@ -312,7 +308,7 @@ function searchHash() {
     currentBreed = firstDog;
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
     breedPic.open("GET", breed);
-    breedPic.addEventListener("load", breedListener);
+    breedPic.addEventListener("load", makeBreedPics);
     breedPic.send();
     isBreed = true;
   }
@@ -323,7 +319,7 @@ function searchHash() {
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
     currentSubBreed + "/images/random/3";
     subBreedPic.open("GET", breed);
-    subBreedPic.addEventListener("load", subBreedListener);
+    subBreedPic.addEventListener("load", makeSubPics);
     subBreedPic.send();
     isSub = true;
   }
@@ -333,16 +329,9 @@ let breedPic = new XMLHttpRequest();
 let subBreed = new XMLHttpRequest();
 let subBreedPic = new XMLHttpRequest();
 
-
 let isHash = false;
 let notHash = false;
-let hashFound = false;
-let whereAmI;
 let currentHash = window.location.hash;
-if (hashFound = false) {
-  window.location.hash = "index";
-}
-console.log(currentHash);
 
 let bArr = Array(90);
 for (var i = 0; i < bArr.length; i++) {
@@ -369,14 +358,13 @@ let currentSubBreed = "";
 
 let pic = new XMLHttpRequest();
 pic.open("GET", "https://dog.ceo/api/breeds/image/random/3");
-pic.addEventListener("load", picListener);
+pic.addEventListener("load", randomPic);
 pic.send();
 
 let oReq = new XMLHttpRequest();
-oReq.addEventListener("load", reqListener);
+oReq.addEventListener("load", mainList);
 oReq.open("GET", "https://dog.ceo/api/breeds/list/all");
 oReq.send();
-
 
 let myButton = document.querySelector("button");
 myButton.addEventListener("click", onClick);
