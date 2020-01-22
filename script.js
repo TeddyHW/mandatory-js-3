@@ -21,13 +21,20 @@ function mainList() {
 }
 
 function subLister() {
-  if (isHash === false) {
+  if (isHashing === true && done === false) {
+    return;
+  }
+  if (isHashing === false) {
     setHash();
   }
-  //isHash = false;
-  isSub = false;
-  let obj = JSON.parse(subBreed.responseText);
-  subBreedList = Object(obj.message);
+  if (myList.includes(currentBreed)) {
+    end = false;
+
+  }
+  else {
+    end = true;
+  }
+
   if (subCheck === true) {
     for (var i = 0; i < subLength; i++) {
       let remUL = document.querySelector(".subUl");
@@ -37,9 +44,21 @@ function subLister() {
       remLi.removeChild(remA);
       remUL.removeChild(remLi);
     }
+    subCheck = false;
   }
 
-  subCheck = false;
+  if (end == true) {
+    return;
+  }
+
+  if (isHashing == false) {
+    testObj = JSON.parse(subBreed.responseText);
+    subBreedList = Object(testObj.message);
+  }
+
+  console.log(subBreedList);
+
+
   for (var i = 0; i < subBreedList.length; i++) {
     let ul = document.querySelector(".subUl");
     let list = document.createElement("li");
@@ -52,37 +71,54 @@ function subLister() {
     ul.appendChild(list);
     list.appendChild(link);
 
-    subCheck = true;
     subLength = subBreedList.length;
+    subCheck = true;
   }
   let a = document.querySelectorAll(".mySubLink");
   for (var i = 0; i < a.length; i++) {
     a[i].addEventListener("click", subLinkClick);
   }
   isBreed = true;
-  notHash = false;
 }
 
 function linkClick(e) {
-  let where = e.target;
-  let linkId = where.id;
-  currentBreed = where.textContent;
+  if (isHashing == false) {
+    e.preventDefault();
+  }
+  if (isHashing === false) {
+    let where = e.target;
+    found = where.id;
+    currentBreed = where.textContent;
+  }
+
+
 
   let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
   let subList = "https://dog.ceo/api/breed/" + currentBreed + "/list";
 
   for (var i = 0; i < bArr.length; i++) {
     let loopNum = "num" + [i];
-    if (linkId === loopNum) {
+    if (found === loopNum) {
       bArr[i] = true;
 
-      breedPic.open("GET", breed);
-      breedPic.addEventListener("load", makeBreedPics);
-      breedPic.send();
+      if (dogCheck == true && checkSub == false || isHashing == false) {
+        breedPic.open("GET", breed);
+        breedPic.addEventListener("load", makeBreedPics);
+        breedPic.send();
+      }
 
       subBreed.addEventListener("load", subLister);
       subBreed.open("GET", subList);
       subBreed.send();
+
+      /*console.log(subBreed);
+
+      if (subBreed.status == 0) {
+        empty = true;
+      }
+      else if (subBreed.status !== 0) {
+        empty = false;
+      }*/
 
       let title = document.querySelector("h1");
       title.textContent = currentBreed;
@@ -92,9 +128,18 @@ function linkClick(e) {
 }
 
 function subLinkClick(e) {
+  e.preventDefault();
   let where = e.target;
-  let linkId = where.id;
-  currentSubBreed = where.textContent;
+  if (where.class === "mySubLink") {
+    return;
+  }
+  if (isHashing == false) {
+    found = where.id;
+    currentSubBreed = where.textContent;
+    isSub = true;
+  }
+
+
 
   let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
   currentSubBreed + "/images/random/3";
@@ -142,10 +187,12 @@ function randomPic() {
 }
 
 function makeBreedPics() {
-  if (isHash === false) {
+  isBreed = true;
+  isSub = false;
+  if (isHashing === false) {
     setHash();
   }
-  isHash = false;
+  isHashing = false;
   let randPic = JSON.parse(breedPic.responseText);
   let arrPic = randPic.message;
 
@@ -192,19 +239,19 @@ function makeBreedPics() {
       bCheck3 = true;
     }
   }
-  notHash = false;
 }
 
 function makeSubPics() {
   isBreed = false;
   isSub = true;
-  if (isHash === false) {
+  if (isHashing === false) {
     setHash();
   }
-  isHash = false;
+
   let randPic = JSON.parse(subBreedPic.responseText);
   let arrPic = randPic.message;
 
+  isHashing = false;
 
   let remDiv1 = document.querySelector("#b1");
   let remDiv2 = document.querySelector("#b2");
@@ -219,7 +266,7 @@ function makeSubPics() {
   bCheck1 = false;
   bCheck2 = false;
   bCheck3 = false;
-  for (var i = 0; i < arrPic.length; i++) {
+  for (var i = 0; i < 3; i++) {
     if (bCheck1 === false) {
       let divPic = document.querySelector("#b1");
       let img = document.createElement("img");
@@ -249,7 +296,6 @@ function makeSubPics() {
     }
   }
   isSub = true;
-  notHash = false;
 }
 
 function onClick(e) {
@@ -272,22 +318,30 @@ function onClick(e) {
 }
 
 function setHash() {
-  if (isHash === true) {
+  if (isHashing === true) {
     return;
   }
-  notHash = true;
   if (isBreed === true && isSub === false) {
     currentHash = currentBreed;
     window.location.hash = currentHash;
+    working = "#" + currentHash;
   }
   else if (isSub === true) {
     currentHash = currentBreed + "-" + currentSubBreed;
     window.location.hash = currentHash;
+    working = "#" + currentHash;
   }
 }
 
 function searchHash() {
-  if (notHash === true) {
+  testing = window.location.hash;
+
+  if (testing !== working) {
+    isHashing = true;
+    working = testing;
+  }
+
+  if (isHashing === false) {
     return;
   }
   let fullDog = window.location.hash.substr(1);
@@ -295,25 +349,49 @@ function searchHash() {
   let firstDog = arrDog[0];
   let secondDog = arrDog[1];
 
-  let dogCheck = breedList.includes(firstDog);
+  dogCheck = breedList.includes(firstDog);
+  if (dogCheck = false) {
+    return;
+  }
 
-  let subList = "https://dog.ceo/api/breed/" + firstDog + "/list";
-  subBreed.addEventListener("load", subLister);
-  subBreed.open("GET", subList);
-  subBreed.send();
+  if (secondDog === undefined) {
+    dogCheck = true;
+    checkSub = false;
+  }
+  else {
+    dogCheck = false;
+    checkSub = true;
+    //makeSubPics();
+  }
 
-  let checkSub = subBreedList.includes(secondDog);
+  currentBreed = firstDog;
+
+  isHashing = true;
+  for (var i = 0; i < breedList.length; i++) {
+    let numberId = "num" + i
+    let find = document.querySelector("#" + numberId);
+    if (find.textContent === firstDog) {
+      found = numberId;
+      break;
+    }
+  }
+
+  done = true;
+  linkClick();
+  //subLister();
+
+
+  //checkSub = subBreedList.includes(secondDog);
   if (dogCheck === true && checkSub === false) {
-    isHash = true;
     currentBreed = firstDog;
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/images/random/3";
     breedPic.open("GET", breed);
     breedPic.addEventListener("load", makeBreedPics);
     breedPic.send();
     isBreed = true;
+    isHashing = false;
   }
   else if (checkSub === true) {
-    isHash = true;
     currentBreed = firstDog;
     currentSubBreed = secondDog;
     let breed = "https://dog.ceo/api/breed/" + currentBreed + "/" +
@@ -322,15 +400,29 @@ function searchHash() {
     subBreedPic.addEventListener("load", makeSubPics);
     subBreedPic.send();
     isSub = true;
+    isHashing = false;
   }
+  done = false;
 }
+
+
+let testObj;
+
+let dogCheck = false;
+let checkSub = false;
 
 let breedPic = new XMLHttpRequest();
 let subBreed = new XMLHttpRequest();
 let subBreedPic = new XMLHttpRequest();
 
-let isHash = false;
-let notHash = false;
+let isHashing = false;
+let done = false;
+
+let found;
+
+let testing = window.location.hash;
+let working = "";
+
 let currentHash = window.location.hash;
 
 let bArr = Array(90);
@@ -342,6 +434,39 @@ window.addEventListener("hashchange", searchHash);
 
 let breedList = [];
 let subBreedList = [];
+
+let empty = true;
+let end = false;
+let myList = [
+  "australian",
+  "buhund",
+  "bulldog",
+  "bullterrier",
+  "cattledog",
+  "collie",
+  "corgi",
+  "dane",
+  "deerhound",
+  "elkhound",
+  "frise",
+  "greyhound",
+  "hound",
+  "mastiff",
+  "mountain",
+  "pinscher",
+  "pointer",
+  "poodle",
+  "retriever",
+  "ridgeback",
+  "schnauzer",
+  "setter",
+  "sheepdog",
+  "spaniel",
+  "springer",
+  "terrier",
+  "waterdog",
+  "wolfhound"
+]
 
 let subCheck = false;
 let subLength;
